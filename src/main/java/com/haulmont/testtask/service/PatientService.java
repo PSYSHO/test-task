@@ -42,12 +42,10 @@ public class PatientService implements DAO<Patient> {
 
     @Override
     public List<Patient> getAll() {
-        connection = connectionManager.getConnection();
         List<Patient> patients = new LinkedList<>();
         String sql = "SELECT * FROM PATIENT";
 
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Patient patient = new Patient();
@@ -61,15 +59,6 @@ public class PatientService implements DAO<Patient> {
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
         return patients;
     }
@@ -104,10 +93,8 @@ public class PatientService implements DAO<Patient> {
 
     @Override
     public void update(Patient patient){
-        connection = connectionManager.getConnection();
-        String sql = "UPDATE PATIENT SET firstname=?,secondName=?,lastName=?,specialization=? where id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        String sql = "UPDATE PATIENT SET firstname=?,secondName=?,lastName=?,phone=? where id=?";
+        try (Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, patient.getFirstName());
             preparedStatement.setString(2, patient.getSecondName());
             preparedStatement.setString(3, patient.getLastName());
@@ -117,37 +104,20 @@ public class PatientService implements DAO<Patient> {
 
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
     }
 
     @Override
-    public void remove(Patient patient){
-        connection = connectionManager.getConnection();
+    public boolean remove(Patient patient){
+        boolean check = false;
         String sql = "DELETE FROM PATIENT Where id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, patient.getId());
             preparedStatement.executeUpdate();
+            check = true;
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
+            return check;
     }
 }

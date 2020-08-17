@@ -22,11 +22,11 @@ public class PatientView extends VerticalLayout implements View {
 
     public PatientView() {
         MenuBar menuBar = new MenuBar();
-        menuBar.addItem("Пациенты", (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("doctor"));
+        menuBar.addItem("Patient", (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("doctor"));
         menuBar.getItems().get(0).setEnabled(false);
-        menuBar.addItem("Доктора",
+        menuBar.addItem("Doctor",
                 (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("doctor"));
-        menuBar.addItem("Рецепты",
+        menuBar.addItem("Recipe",
                 (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("recipe"));
         setMargin(true);
         setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);

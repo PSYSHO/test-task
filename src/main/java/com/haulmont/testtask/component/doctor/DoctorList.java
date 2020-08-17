@@ -12,30 +12,36 @@ import java.util.List;
 
 
 public class DoctorList extends VerticalLayout implements ChangeListener<Doctor> {
+    public DoctorList() {
+    }
+
+    public DoctorList(DoctorService doctorService, List<Doctor> doctorList) {
+        this.doctorService = doctorService;
+        this.doctorList = doctorList;
+    }
 
     DoctorService doctorService = new DoctorService();
     private List<Doctor> doctorList;
 
     @PostConstruct
-    void init() throws SQLException {
+    void init(){
         setWidth("80%");
         update();
     }
 
     @Override
-    public void changed(Doctor doctor) throws SQLException {
+    public void changed(Doctor doctor) throws SQLException{
         if (doctor.getSelect()) {
             doctor.setSelect(false);
             update();
         } else doctorList.add(doctor);
     }
 
-    void update() throws SQLException {
-        setTodos(doctorService.getAll());
-
+    void update() {
+            setDoctor(doctorService.getAll());
     }
 
-    private void setTodos(List<Doctor> doctors) {
+    private void setDoctor(List<Doctor> doctors) {
         this.doctorList = doctors;
         removeAllComponents();
         doctorList.forEach(doctor -> addComponent(new DoctorLayout(doctor, this)));

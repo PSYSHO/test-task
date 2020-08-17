@@ -56,22 +56,22 @@ public class RecipeView extends VerticalLayout implements View {
         typeSelect.addValueChangeListener(event -> {
             if (typeSelect.getValue().equals(DESCRIPTION)) {
                 filterBox.removeAllComponents();
-                filterBox.addComponents(typeSelect, filter, search);
+                filterBox.addComponents(typeSelect, filter, search, create);
             } else if (typeSelect.getValue().equals(PRIORITY)) {
                 filterBox.removeAllComponents();
                 priorityComboBox.setItems(Priority.values());
-                filterBox.addComponents(typeSelect, priorityComboBox, search);
+                filterBox.addComponents(typeSelect, priorityComboBox, search, create);
             } else if (typeSelect.getValue().equals(PATIENT)) {
                 filterBox.removeAllComponents();
                 patientComboBox.setItems(patientService.getAll());
-                filterBox.addComponents(typeSelect, patientComboBox, search);
+                filterBox.addComponents(typeSelect, patientComboBox, search, create);
             } else if (typeSelect.getValue().equals(DOCTOR)) {
                 filterBox.removeAllComponents();
                 doctorComboBox.setItems(doctorService.getAll());
-                filterBox.addComponents(typeSelect, doctorComboBox, search);
+                filterBox.addComponents(typeSelect, doctorComboBox, search, create);
             } else {
                 filterBox.removeAllComponents();
-                filterBox.addComponents(typeSelect, filter, search);
+                filterBox.addComponents(typeSelect, search,create);
             }
         });
         search.addClickListener(e -> {
@@ -91,15 +91,16 @@ public class RecipeView extends VerticalLayout implements View {
         });
         grid.setWidth("90%");
         grid.setItems(recipeService.getAll());
-        grid.addColumn(Recipe::getDescription).setCaption("Description");
-        grid.addColumn(Recipe::getPatient).setCaption("Patient");
-        grid.addColumn(Recipe::getDoctor).setCaption("Doctor");
+        grid.addColumn(Recipe::getDescription).setCaption(DESCRIPTION);
+        grid.addColumn(Recipe::getPatient).setCaption(PATIENT);
+        grid.addColumn(Recipe::getDoctor).setCaption(DOCTOR);
         grid.addColumn(Recipe::getCreateDate).setCaption("Create Date");
-        grid.addColumn(Recipe::getValidate).setCaption("Validate");
-        grid.addColumn(Recipe::getPriority).setCaption("Priority");
+        grid.addColumn(Recipe::getValidate).setCaption("shelf life");
+        grid.addColumn(Recipe::getPriority).setCaption(PRIORITY);
         grid.addColumn(recipe -> "edit",
                 new ButtonRenderer(clickEvent -> {
-                    Window editWindow = new EditWindow((Recipe) clickEvent.getItem());
+                    Window editWindow = null;
+                    editWindow = new EditWindow((Recipe) clickEvent.getItem());
                     editWindow.addCloseListener(closeEvent -> grid.setItems(recipeService.getAll()));
                     UI.getCurrent().addWindow(editWindow);
                 }));
@@ -185,6 +186,7 @@ class AddWindow extends Window {
         priorityComboBox.setItems(Priority.values());
         priorityComboBox.setWidth("90%");
         priorityComboBox.setEmptySelectionAllowed(false);
+        priorityComboBox.setTextInputAllowed(false);
         priorityComboBox.addValueChangeListener(event -> priorityComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         patientComboBox = new ComboBox<>("Patient");
@@ -192,6 +194,7 @@ class AddWindow extends Window {
         patientComboBox.setItems(patientService.getAll());
         patientComboBox.setWidth("90%");
         patientComboBox.setEmptySelectionAllowed(false);
+        patientComboBox.setTextInputAllowed(false);
         patientComboBox.addValueChangeListener(event -> patientComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         doctorComboBox = new ComboBox<>("Doctor");
@@ -199,6 +202,7 @@ class AddWindow extends Window {
         doctorComboBox.setItems(doctorService.getAll());
         doctorComboBox.setWidth("90%");
         doctorComboBox.setEmptySelectionAllowed(false);
+        doctorComboBox.setTextInputAllowed(false);
         doctorComboBox.addValueChangeListener(event -> doctorComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         endOfShelfLife = new DateField("Validate");
@@ -292,6 +296,7 @@ class EditWindow extends Window {
         priorityComboBox.setWidth("90%");
         priorityComboBox.setEmptySelectionAllowed(false);
         priorityComboBox.setValue(recipe.getPriority());
+        patientComboBox.setTextInputAllowed(false);
         priorityComboBox.addValueChangeListener(event -> priorityComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         patientComboBox = new ComboBox<>("Patient");
@@ -300,6 +305,7 @@ class EditWindow extends Window {
         patientComboBox.setWidth("90%");
         patientComboBox.setEmptySelectionAllowed(false);
         patientComboBox.setValue(recipe.getPatient());
+        patientComboBox.setTextInputAllowed(false);
         patientComboBox.addValueChangeListener(event -> patientComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         doctorComboBox = new ComboBox<>("Doctor");
@@ -308,6 +314,7 @@ class EditWindow extends Window {
         doctorComboBox.setWidth("90%");
         doctorComboBox.setEmptySelectionAllowed(false);
         doctorComboBox.setValue(recipe.getDoctor());
+        doctorComboBox.setTextInputAllowed(false);
         doctorComboBox.addValueChangeListener(event -> doctorComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         endOfShelfLife = new DateField("Validate");
@@ -347,6 +354,7 @@ class EditWindow extends Window {
         content.addComponent(buttonsLayout);
         setContent(content);
     }
+
     private static boolean validate() {
         boolean isValid = true;
         if (description.getValue() == null || description.getValue().isEmpty()) {

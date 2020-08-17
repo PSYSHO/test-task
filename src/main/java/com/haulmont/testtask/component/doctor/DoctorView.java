@@ -15,7 +15,7 @@ import java.sql.SQLException;
 @Theme("valo")
 public class DoctorView extends VerticalLayout implements View {
     private VerticalLayout layout;
-    DoctorList doctorList = new DoctorList();
+    private DoctorList doctorList = new DoctorList();
 
     private DoctorService doctorService;
 
@@ -75,12 +75,16 @@ public class DoctorView extends VerticalLayout implements View {
             });
             HorizontalLayout layout = new HorizontalLayout();
             Button close = new Button("Close");
-            layout.addComponents(add,close);
-            subContent.addComponents(firstname, secondName, lastName, specializiation,layout);
+            close.addClickListener(clo -> {
+                doctorAddWindow.close();
+            });
+            layout.addComponents(add, close);
+            subContent.addComponents(firstname, secondName, lastName, specializiation, layout);
             doctorAddWindow.setContent(subContent);
             doctorAddWindow.setModal(true);
             UI.getCurrent().addWindow(doctorAddWindow);
             add.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+            close.setClickShortcut(ShortcutAction.KeyCode.ESCAPE);
         });
         TextField taskField = new TextField();
         taskField.focus();

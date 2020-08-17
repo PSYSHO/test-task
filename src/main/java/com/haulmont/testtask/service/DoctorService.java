@@ -19,8 +19,7 @@ public class DoctorService implements DAO<Doctor> {
     public void add(Doctor doctor) {
         connection = connectionManager.getConnection();
         String sql = "Insert INTO DOCTOR(firstname,secondname,lastname,specialization)VALUES(?,?,?,?)";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, doctor.getFirstName());
             preparedStatement.setString(2, doctor.getSecondName());
             preparedStatement.setString(3, doctor.getLastName());
@@ -28,15 +27,6 @@ public class DoctorService implements DAO<Doctor> {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
     }
 
@@ -45,8 +35,7 @@ public class DoctorService implements DAO<Doctor> {
         List<Doctor> doctors = new LinkedList<>();
         connection = connectionManager.getConnection();
         String sql = "SELECT * FROM DOCTOR";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Doctor doctor = new Doctor();
@@ -60,17 +49,7 @@ public class DoctorService implements DAO<Doctor> {
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            if (connection != null || preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
-
         return doctors;
     }
 
@@ -129,24 +108,17 @@ public class DoctorService implements DAO<Doctor> {
     }
 
     @Override
-    public void remove(Doctor doctor) {
-        connection = connectionManager.getConnection();
+    public boolean remove(Doctor doctor) {
+        boolean check = false;
         String sql = "DELETE FROM DOCTOR Where id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, doctor.getId());
             preparedStatement.executeUpdate();
+            check = true;
+
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
+        return check;
     }
 }

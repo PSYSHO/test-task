@@ -21,10 +21,8 @@ public class RecipeService implements DAO<Recipe> {
 
     @Override
     public void add(Recipe recipe) {
-        connection = ConnectionManager.getConnection();
         String sql = "INSERT INTO RECIPE(DESCRIPTION,PATIENT,DOCTOR,CREATEDATA,VALIDATE,PRIORITY)VALUES(?,?,?,?,?,?)";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, recipe.getDescription());
             preparedStatement.setLong(2, recipe.getPatient().getId());
             preparedStatement.setLong(3, recipe.getDoctor().getId());
@@ -34,15 +32,6 @@ public class RecipeService implements DAO<Recipe> {
             preparedStatement.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
 
 
@@ -50,11 +39,9 @@ public class RecipeService implements DAO<Recipe> {
 
     @Override
     public List<Recipe> getAll() {
-        connection = ConnectionManager.getConnection();
         List<Recipe> recipes = new LinkedList<>();
         String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Recipe recipe = new Recipe();
@@ -64,23 +51,12 @@ public class RecipeService implements DAO<Recipe> {
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
-
         return recipes;
     }
 
     @Override
     public Recipe getbyId(long id) throws SQLException {
-        connection = ConnectionManager.getConnection();
         Recipe recipe = new Recipe();
         String sql = "SELECT id,description,patient,doctor,createdata,validate,priority FROM Recipe WHERE ID=?";
         preparedStatement = connection.prepareStatement(sql);
@@ -91,11 +67,9 @@ public class RecipeService implements DAO<Recipe> {
     }
 
     public List<Recipe> findByPriority(Priority priority) {
-        connection = ConnectionManager.getConnection();
         String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE PRIORITY LIKE ?";
         List<Recipe> recipes = new LinkedList<>();
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, priority.toString());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -106,26 +80,15 @@ public class RecipeService implements DAO<Recipe> {
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
         return recipes;
 
     }
 
     public List<Recipe> findByDescription(String description) {
-        connection = ConnectionManager.getConnection();
         String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE DESCRIPTION LIKE ?";
         List<Recipe> recipes = new LinkedList<>();
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, description);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -136,25 +99,14 @@ public class RecipeService implements DAO<Recipe> {
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
         return recipes;
     }
 
     public List<Recipe> findByPatient(Patient patient) {
-        connection = ConnectionManager.getConnection();
         String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE PATIENT.ID = ?";
         List<Recipe> recipes = new LinkedList<>();
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement =connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, patient.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -165,25 +117,14 @@ public class RecipeService implements DAO<Recipe> {
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
         return recipes;
     }
 
     public List<Recipe> findByDoctor(Doctor doctor) {
-        connection = ConnectionManager.getConnection();
         String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE DOCTOR.ID = ?";
         List<Recipe> recipes = new LinkedList<>();
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement= connection.prepareStatement(sql)){
             preparedStatement.setLong(1, doctor.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -194,15 +135,6 @@ public class RecipeService implements DAO<Recipe> {
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
         return recipes;
     }
@@ -210,10 +142,8 @@ public class RecipeService implements DAO<Recipe> {
 
     @Override
     public void update(Recipe recipe) {
-        connection = ConnectionManager.getConnection();
         String sql = "UPDATE RECIPE SET DESCRIPTION=?,PATIENT=?,DOCTOR=?,CREATEDATA=?,VALIDATE=?,PRIORITY=? where id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, recipe.getDescription());
             preparedStatement.setLong(2, recipe.getPatient().getId());
             preparedStatement.setLong(3, recipe.getDoctor().getId());
@@ -224,38 +154,21 @@ public class RecipeService implements DAO<Recipe> {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
-
     }
 
     @Override
-    public void remove(Recipe recipe) {
+    public boolean remove(Recipe recipe) {
+        boolean check = false;
         String sql = "DELETE FROM Recipe where id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, recipe.getId());
             preparedStatement.executeUpdate();
+            check=true;
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (connection != null || preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
+        return check;
     }
 
     private Patient fillingInnThePatient(Patient patient, ResultSet resultSet) throws SQLException {

@@ -8,5 +8,5 @@ public interface DAO<T> {
     List<T> getAll() throws SQLException;
     T getbyId(long id) throws SQLException;
     void update(T obj) throws SQLException;
-    void remove(T obj) throws SQLException;
+    boolean remove(T obj) throws SQLException;
 }
