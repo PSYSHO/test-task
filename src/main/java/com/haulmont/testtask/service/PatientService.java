@@ -11,13 +11,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class PatientService implements DAO<Patient> {
-    Util util = new Util();
-    Connection connection ;
+    ConnectionManager connectionManager = new ConnectionManager();
+    Connection connection;
     PreparedStatement preparedStatement = null;
 
     @Override
-    public void add(Patient patient) throws SQLException {
-        Connection connection = util.getConnection();
+    public void add(Patient patient) {
+        connection = connectionManager.getConnection();
         String sql = "INSERT INTO PATIENT(firstname,LASTNAME,SECONDNAME,PHONE)VALUES(?,?,?,?)";
         try {
             preparedStatement = connection.prepareStatement(sql);
@@ -29,38 +29,54 @@ public class PatientService implements DAO<Patient> {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         }
     }
 
     @Override
-    public List<Patient> getAll() throws SQLException {
-        Connection connection = util.getConnection();
+    public List<Patient> getAll() {
+        connection = connectionManager.getConnection();
         List<Patient> patients = new LinkedList<>();
         String sql = "SELECT * FROM PATIENT";
-        preparedStatement = connection.prepareStatement(sql);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            Patient patient = new Patient();
-            patient.setId(resultSet.getLong("id"));
-            patient.setFirstName(resultSet.getString("firstname"));
-            patient.setSecondName(resultSet.getString("secondname"));
-            patient.setLastName(resultSet.getString("lastname"));
-            patient.setPhone(resultSet.getString("phone"));
-            patient.setSelect(false);
-            patients.add(patient);
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Patient patient = new Patient();
+                patient.setId(resultSet.getLong("id"));
+                patient.setFirstName(resultSet.getString("firstname"));
+                patient.setSecondName(resultSet.getString("secondname"));
+                patient.setLastName(resultSet.getString("lastname"));
+                patient.setPhone(resultSet.getString("phone"));
+                patient.setSelect(false);
+                patients.add(patient);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
         }
         return patients;
     }
 
     @Override
-    public Patient getbyId(long id) throws SQLException {
-        Connection connection = util.getConnection();
+    public Patient getbyId(long id) {
+        connection = connectionManager.getConnection();
         Patient patient = new Patient();
         String sql = "SELECT id,firstname,secondname,lastname,phone FROM patient WHERE ID=?";
         try {
@@ -74,43 +90,48 @@ public class PatientService implements DAO<Patient> {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         }
         return patient;
     }
 
     @Override
-    public void update(Patient patient) throws SQLException {
-        Connection connection = util.getConnection();
-        String sql = "UPDATE PATIENT SET id=?,firstname=?,secondName=?,lastName=?,specialization=? where id=?";
+    public void update(Patient patient){
+        connection = connectionManager.getConnection();
+        String sql = "UPDATE PATIENT SET firstname=?,secondName=?,lastName=?,specialization=? where id=?";
         try {
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setLong(1, patient.getId());
-            preparedStatement.setString(2, patient.getFirstName());
-            preparedStatement.setString(3, patient.getSecondName());
-            preparedStatement.setString(4, patient.getLastName());
-            preparedStatement.setString(5, patient.getPhone());
+            preparedStatement.setString(1, patient.getFirstName());
+            preparedStatement.setString(2, patient.getSecondName());
+            preparedStatement.setString(3, patient.getLastName());
+            preparedStatement.setString(4, patient.getPhone());
+            preparedStatement.setLong(5, patient.getId());
             preparedStatement.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         }
     }
 
     @Override
-    public void remove(Patient patient) throws SQLException {
-        Connection connection = util.getConnection();
+    public void remove(Patient patient){
+        connection = connectionManager.getConnection();
         String sql = "DELETE FROM PATIENT Where id=?";
         try {
             preparedStatement = connection.prepareStatement(sql);
@@ -119,11 +140,13 @@ public class PatientService implements DAO<Patient> {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         }
     }

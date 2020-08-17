@@ -1,6 +1,8 @@
 package com.haulmont.testtask.service;
 
 import com.haulmont.testtask.dao.DAO;
+import com.haulmont.testtask.entity.Doctor;
+import com.haulmont.testtask.entity.Patient;
 import com.haulmont.testtask.entity.Priority;
 import com.haulmont.testtask.entity.Recipe;
 
@@ -9,107 +11,234 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
 public class RecipeService implements DAO<Recipe> {
-    DoctorService doctorService;
-    PatientService patientService;
-    Util util = new Util();
-    Connection connection = util.getConnection();
+    Connection connection;
     PreparedStatement preparedStatement = null;
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
 
     @Override
-    public void add(Recipe recipe) throws SQLException {
-        String sql = "INSERT INTO RECIPE(ID,DESCRIPTION,PATIENT,DOCTOR,CREATEDATA,VALIDATE,PRIORITY)VALUES(?,?,?,?,?,?,?)";
+    public void add(Recipe recipe) {
+        connection = ConnectionManager.getConnection();
+        String sql = "INSERT INTO RECIPE(DESCRIPTION,PATIENT,DOCTOR,CREATEDATA,VALIDATE,PRIORITY)VALUES(?,?,?,?,?,?)";
         try {
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setLong(1, recipe.getId());
-            preparedStatement.setString(2, recipe.getDescription());
-            preparedStatement.setLong(3, recipe.getPatient().getId());
-            preparedStatement.setLong(4, recipe.getDoctor().getId());
-            preparedStatement.setDate(5, java.sql.Date.valueOf(dateFormat.format(new Date())));
-            preparedStatement.setString(6, recipe.getValidate());
-            preparedStatement.setString(7, String.valueOf(recipe.getPriority()));
-        } catch (SQLException e) {
-            e.printStackTrace();
+            preparedStatement.setString(1, recipe.getDescription());
+            preparedStatement.setLong(2, recipe.getPatient().getId());
+            preparedStatement.setLong(3, recipe.getDoctor().getId());
+            preparedStatement.setObject(4, recipe.getCreateDate());
+            preparedStatement.setObject(5, recipe.getValidate());
+            preparedStatement.setString(6, String.valueOf(recipe.getPriority()));
+            preparedStatement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         }
+
+
     }
 
-
-    //todo Реализацию данного метода можно сделать без использования сервисов, заменив их написание большого SQL запроса.
     @Override
-    public List<Recipe> getAll() throws SQLException {
+    public List<Recipe> getAll() {
+        connection = ConnectionManager.getConnection();
         List<Recipe> recipes = new LinkedList<>();
-        String sql = "SELECT * FROM RECIPE";
-        preparedStatement = connection.prepareStatement(sql);
-        ResultSet resultSet = preparedStatement.executeQuery(sql);
-        while (resultSet.next()) {
-            Recipe recipe = new Recipe();
-            recipe.setId(resultSet.getLong("id"));
-            fillingInnTheObject(recipe, resultSet);
-            recipes.add(recipe);
+        String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Recipe recipe = new Recipe();
+                recipe.setId(resultSet.getLong("id"));
+                fillingInnTheRecipe(recipe, resultSet);
+                recipes.add(recipe);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
         }
+
         return recipes;
     }
 
     @Override
     public Recipe getbyId(long id) throws SQLException {
-        Recipe recipe =new Recipe();
+        connection = ConnectionManager.getConnection();
+        Recipe recipe = new Recipe();
         String sql = "SELECT id,description,patient,doctor,createdata,validate,priority FROM Recipe WHERE ID=?";
         preparedStatement = connection.prepareStatement(sql);
         ResultSet resultSet = preparedStatement.executeQuery();
         recipe.setId(resultSet.getLong("id"));
-        fillingInnTheObject(recipe, resultSet);
+        fillingInnTheRecipe(recipe, resultSet);
         return recipe;
     }
 
-    private void fillingInnTheObject(Recipe recipe, ResultSet resultSet) throws SQLException {
-        recipe.setCreateDate(resultSet.getDate("createdata"));
-        recipe.setDescription(resultSet.getString("description"));
-        recipe.setDoctor(doctorService.getbyId(resultSet.getLong("doctor")));
-        recipe.setPatient(patientService.getbyId(resultSet.getLong("patient")));
-        recipe.setPriority(Priority.valueOf(resultSet.getString("priority")));
-        recipe.setValidate(resultSet.getString("validate"));
-    }
-
-    @Override
-    public void update(Recipe recipe) throws SQLException {
-        String sql = "UPDATE RECIPE SET ID=?,DESCRIPTION=?,PATIENT=?,DOCTOR=?,CREATEDATA=?,VALIDATE=?,PRIORITY=? where id=?";
+    public List<Recipe> findByPriority(Priority priority) {
+        connection = ConnectionManager.getConnection();
+        String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE PRIORITY LIKE ?";
+        List<Recipe> recipes = new LinkedList<>();
         try {
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setLong(1, recipe.getId());
-            preparedStatement.setString(2,recipe.getDescription());
-            preparedStatement.setLong(3,recipe.getPatient().getId());
-            preparedStatement.setLong(4,recipe.getDoctor().getId());
-            preparedStatement.setDate(5, (java.sql.Date) recipe.getCreateDate());
-            preparedStatement.setString(6,recipe.getValidate());
-            preparedStatement.setString(7, String.valueOf(recipe.getPriority()));
+            preparedStatement.setString(1, priority.toString());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Recipe recipe = new Recipe();
+                recipe.setId(resultSet.getLong("id"));
+                fillingInnTheRecipe(recipe, resultSet);
+                recipes.add(recipe);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return recipes;
+
+    }
+
+    public List<Recipe> findByDescription(String description) {
+        connection = ConnectionManager.getConnection();
+        String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE DESCRIPTION LIKE ?";
+        List<Recipe> recipes = new LinkedList<>();
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, description);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Recipe recipe = new Recipe();
+                recipe.setId(resultSet.getLong("id"));
+                fillingInnTheRecipe(recipe, resultSet);
+                recipes.add(recipe);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return recipes;
+    }
+
+    public List<Recipe> findByPatient(Patient patient) {
+        connection = ConnectionManager.getConnection();
+        String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE PATIENT.ID = ?";
+        List<Recipe> recipes = new LinkedList<>();
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, patient.getId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Recipe recipe = new Recipe();
+                recipe.setId(resultSet.getLong("id"));
+                fillingInnTheRecipe(recipe, resultSet);
+                recipes.add(recipe);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return recipes;
+    }
+
+    public List<Recipe> findByDoctor(Doctor doctor) {
+        connection = ConnectionManager.getConnection();
+        String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE DOCTOR.ID = ?";
+        List<Recipe> recipes = new LinkedList<>();
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, doctor.getId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Recipe recipe = new Recipe();
+                recipe.setId(resultSet.getLong("id"));
+                fillingInnTheRecipe(recipe, resultSet);
+                recipes.add(recipe);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return recipes;
+    }
+
+
+    @Override
+    public void update(Recipe recipe) {
+        connection = ConnectionManager.getConnection();
+        String sql = "UPDATE RECIPE SET DESCRIPTION=?,PATIENT=?,DOCTOR=?,CREATEDATA=?,VALIDATE=?,PRIORITY=? where id=?";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, recipe.getDescription());
+            preparedStatement.setLong(2, recipe.getPatient().getId());
+            preparedStatement.setLong(3, recipe.getDoctor().getId());
+            preparedStatement.setObject(4, recipe.getCreateDate());
+            preparedStatement.setObject(5, recipe.getValidate());
+            preparedStatement.setString(6, String.valueOf(recipe.getPriority()));
+            preparedStatement.setLong(7, recipe.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
+            if (preparedStatement != null || connection != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         }
 
     }
 
     @Override
-    public void remove(Recipe recipe) throws SQLException {
+    public void remove(Recipe recipe) {
         String sql = "DELETE FROM Recipe where id=?";
         try {
             preparedStatement = connection.prepareStatement(sql);
@@ -118,12 +247,46 @@ public class RecipeService implements DAO<Recipe> {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
+            if (connection != null || preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                    connection.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         }
+    }
+
+    private Patient fillingInnThePatient(Patient patient, ResultSet resultSet) throws SQLException {
+        patient = new Patient(resultSet.getLong("PATIENT.ID"),
+                resultSet.getString("PATIENT.FIRSTNAME"),
+                resultSet.getString("PATIENT.LASTNAME"),
+                resultSet.getString("PATIENT.SECONDNAME"),
+                resultSet.getString("PATIENT.PHONE"));
+
+
+        return patient;
+    }
+
+    private Doctor fillingInnTheDoctor(Doctor doctor, ResultSet resultSet) throws SQLException {
+        doctor = new Doctor(resultSet.getLong("DOCTOR.ID"),
+                resultSet.getString("DOCTOR.FIRSTNAME"),
+                resultSet.getString("DOCTOR.LASTNAME"),
+                resultSet.getString("DOCTOR.SECONDNAME"),
+                resultSet.getString("DOCTOR.SPECIALIZATION"));
+        return doctor;
+    }
+
+    private Recipe fillingInnTheRecipe(Recipe recipe, ResultSet resultSet) throws SQLException {
+        Doctor doctor = new Doctor();
+        Patient patient = new Patient();
+        recipe.setCreateDate(resultSet.getObject("createdata", LocalDate.class));
+        recipe.setDescription(resultSet.getString("description"));
+        recipe.setDoctor(fillingInnTheDoctor(doctor, resultSet));
+        recipe.setPatient(fillingInnThePatient(patient, resultSet));
+        recipe.setPriority(Priority.valueOf(resultSet.getString("priority")));
+        recipe.setValidate(resultSet.getObject("validate", LocalDate.class));
+        return recipe;
     }
 }

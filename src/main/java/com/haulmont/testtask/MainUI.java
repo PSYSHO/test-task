@@ -1,37 +1,61 @@
 package com.haulmont.testtask;
 
+import com.haulmont.testtask.component.doctor.DoctorView;
+import com.haulmont.testtask.component.patient.PatientView;
+import com.haulmont.testtask.component.recipe.RecipeView;
+import com.haulmont.testtask.service.ConnectionManager;
 import com.vaadin.annotations.Theme;
+import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 
-@Theme(ValoTheme.THEME_NAME)
+@Theme("valo")
 public class MainUI extends UI {
 
-    //private PatientUi patientUi;
-    private VerticalLayout verticalLayout = new VerticalLayout();
-    private Button getPatientUI = new Button("Manage Patient");
-    private Button getDoctorUI = new Button("Manage Doctor");
-    private Button getRecipeUI = new Button("Manage Recipe");
-    private Label label = new Label("Welcome to the test TASK");
+    public static Navigator navigator;
 
+    private static boolean isDBCreated = false;
+
+    public static final String PATIENT = "patient";
+
+    public static final String DOCTOR = "doctor";
+
+    public static final String RECIPE = "recipe";
+    public boolean check = false;
 
     @Override
     protected void init(VaadinRequest request) {
-        setVerticalLayout();
-    }
-    private void setVerticalLayout(){
-        verticalLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        label.addStyleName(ValoTheme.LABEL_H1);
-        getDoctorUI.setWidth("150");getPatientUI.setWidth("150");getRecipeUI.setWidth("150");
-
-
-        verticalLayout.addComponent(label);
-        verticalLayout.addComponents(getDoctorUI,getPatientUI,getRecipeUI);
-
-        setContent(verticalLayout);
+        ConnectionManager.createDB();
+        navigator = new Navigator(this, this);
+        navigator.addView("", new StartView());
+        navigator.addView(PATIENT, new PatientView());
+        navigator.addView(DOCTOR, new DoctorView());
+        navigator.addView(RECIPE, new RecipeView());
     }
 
+}
 
+class StartView extends VerticalLayout implements View {
+    public StartView() {
+        MenuBar menuBar = new MenuBar();
+        menuBar.addItem("Patient",
+                (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("patient"));
+        menuBar.addItem("Doctor",
+                (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("doctor"));
+        menuBar.addItem("Recipe",
+                (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("recipe"));
+        setMargin(true);
+        setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+        addComponent(menuBar);
+    }
+
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+
+    }
 }

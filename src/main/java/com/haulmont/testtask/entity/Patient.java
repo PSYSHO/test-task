@@ -5,17 +5,28 @@ public class Patient {
     private String firstName;
     private String secondName;
     private String lastName;
-    private String Phone;
+    private String phone;
     private Boolean select;
 
     public Patient() {
+
     }
 
-    public Patient( String firstName, String secondName, String lastName, String phone) {
+
+    public Patient(Long id, String firstName, String secondName, String lastName, String phone) {
+        this.id = id;
         this.firstName = firstName;
         this.secondName = secondName;
         this.lastName = lastName;
-        Phone = phone;
+        this.phone = phone;
+        this.select = select;
+    }
+
+    public Patient(String firstName, String secondName, String lastName, String phone) {
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.lastName = lastName;
+        this.phone = phone;
     }
 
     public Boolean getSelect() {
@@ -59,10 +70,15 @@ public class Patient {
     }
 
     public String getPhone() {
-        return Phone;
+        return phone;
     }
 
     public void setPhone(String phone) {
-        Phone = phone;
+        this.phone = phone;
+    }
+
+    @Override
+    public String toString() {
+        return secondName + " " + firstName + " " + phone;
     }
 }

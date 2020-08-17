@@ -11,7 +11,16 @@ public class Doctor {
     public Doctor() {
     }
 
-    public Doctor( String firstName, String secondName, String lastName, String specialization) {
+    public Doctor(Long id, String firstName, String secondName, String lastName, String specialization) {
+        this.id = id;
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.lastName = lastName;
+        this.specialization = specialization;
+        this.select = select;
+    }
+
+    public Doctor(String firstName, String secondName, String lastName, String specialization) {
         this.firstName = firstName;
         this.secondName = secondName;
         this.lastName = lastName;
@@ -64,5 +73,9 @@ public class Doctor {
 
     public void setSpecialization(String specialization) {
         this.specialization = specialization;
+    }
+    @Override
+    public String toString() {
+        return secondName + " " + firstName + " " + specialization;
     }
 }

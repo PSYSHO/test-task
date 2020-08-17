@@ -8,20 +8,20 @@ public class Recipe {
     private String description;
     private  Patient patient;
     private  Doctor doctor;
-    private Date createDate;
-    private String validate;
+    private LocalDate creationDate;
+    private LocalDate endOfShelfLife;
     private Priority priority;
 
     public Recipe() {
     }
 
-    public Recipe(Long id, String description, Patient patient, Doctor doctor, Date createDate, String validate, Priority priority) {
+    public Recipe(Long id, String description, Patient patient, Doctor doctor, LocalDate createDate, LocalDate endOfShelfLife, Priority priority) {
         this.id = id;
         this.description = description;
         this.patient = patient;
         this.doctor = doctor;
-        this.createDate = createDate;
-        this.validate = validate;
+        this.creationDate = createDate;
+        this.endOfShelfLife = endOfShelfLife;
         this.priority = priority;
     }
 
@@ -57,20 +57,20 @@ public class Recipe {
         this.doctor = doctor;
     }
 
-    public Date getCreateDate() {
-        return createDate;
+    public LocalDate getCreateDate() {
+        return creationDate;
     }
 
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
+    public void setCreateDate(LocalDate createDate) {
+        this.creationDate = createDate;
     }
 
-    public String getValidate() {
-        return validate;
+    public LocalDate getValidate() {
+        return endOfShelfLife;
     }
 
-    public void setValidate(String validate) {
-        this.validate = validate;
+    public void setValidate(LocalDate endOfShelfLife) {
+        this.endOfShelfLife = endOfShelfLife;
     }
 
     public Priority getPriority() {

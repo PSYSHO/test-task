@@ -1,53 +1,60 @@
 package com.haulmont.testtask.component.doctor;
 
+import com.haulmont.testtask.MainUI;
 import com.haulmont.testtask.entity.Doctor;
 import com.haulmont.testtask.service.DoctorService;
 import com.vaadin.annotations.Theme;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 
 import java.sql.SQLException;
 
 @Theme("valo")
-public class DoctorUi extends UI implements View {
+public class DoctorView extends VerticalLayout implements View {
     private VerticalLayout layout;
-    DoctorList doctorList;
+    DoctorList doctorList = new DoctorList();
 
     private DoctorService doctorService;
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
+    public DoctorView() {
+        setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+        MenuBar menuBar = new MenuBar();
+        menuBar.setStyleName("Light");
+        menuBar.addItem("Patient", (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("patient"));
+        menuBar.addItem("Doctor", (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("doctor"));
+        menuBar.getItems().get(1).setEnabled(false);
+        menuBar.addItem("Recipe", (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("recipe"));
+        setMargin(true);
+        addComponent(menuBar);
         setupLayout();
         addHeader();
-        addForm();
         addDoctorList();
         addActionButtons();
+
     }
 
+
     private void setupLayout() {
-        Button button = new Button("Patient");
-        button.addClickListener(e -> {
-            getUI().getNavigator().navigateTo("/p");
-        });
         layout = new VerticalLayout();
         layout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        layout.addComponent(button);
-        setContent(layout);
+        addComponent(layout);
     }
 
     private void addHeader() {
-        Label header = new Label("DOCTOR WHO");
+        Label header = new Label("Doctor list");
         header.addStyleName(ValoTheme.LABEL_H1);
         layout.addComponent(header);
     }
 
-    private void addForm() {
+    private void addDoctorList() {
+        layout.addComponent(doctorList);
+    }
+
+    private void addActionButtons() {
         HorizontalLayout formLayout = new HorizontalLayout();
-        formLayout.setWidth("80%");
         Button create = new Button("create");
         create.addClickListener(e -> {
             Button add = new Button("Add");
@@ -66,34 +73,18 @@ public class DoctorUi extends UI implements View {
                 }
                 doctorAddWindow.close();
             });
-            subContent.addComponents(firstname, secondName, lastName, specializiation, add);
+            HorizontalLayout layout = new HorizontalLayout();
+            Button close = new Button("Close");
+            layout.addComponents(add,close);
+            subContent.addComponents(firstname, secondName, lastName, specializiation,layout);
             doctorAddWindow.setContent(subContent);
             doctorAddWindow.setModal(true);
-            addWindow(doctorAddWindow);
+            UI.getCurrent().addWindow(doctorAddWindow);
             add.setClickShortcut(ShortcutAction.KeyCode.ENTER);
-
         });
         TextField taskField = new TextField();
         taskField.focus();
-        layout.addComponents(create);
-    }
-
-    private void addDoctorList() {
-        layout.addComponent(doctorList);
-    }
-
-    private void addActionButtons() {
-        Button deleteButton = new Button("Delete selected items");
-
-        deleteButton.addClickListener(click -> {
-            try {
-                doctorList.deleteCompleted();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        });
-
-        layout.addComponent(deleteButton);
+        layout.addComponent(create);
 
     }
 

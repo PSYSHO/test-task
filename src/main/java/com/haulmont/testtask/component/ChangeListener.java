@@ -1,4 +1,4 @@
-package com.haulmont.testtask.dao;
+package com.haulmont.testtask.component;
 
 import java.sql.SQLException;
 
