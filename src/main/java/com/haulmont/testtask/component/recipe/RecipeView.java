@@ -45,6 +45,7 @@ public class RecipeView extends VerticalLayout implements View {
         TextField filter = new TextField();
         ComboBox<String> typeSelect = new ComboBox();
         typeSelect.setItems(PATIENT, PRIORITY, DOCTOR, DESCRIPTION, ALL);
+        typeSelect.setEmptySelectionAllowed(false);
 
         Button search = new Button("Search");
         Button create = new Button("Create");
@@ -304,7 +305,6 @@ class EditWindow extends Window {
         priorityComboBox.setWidth("90%");
         priorityComboBox.setEmptySelectionAllowed(false);
         priorityComboBox.setValue(recipe.getPriority());
-        patientComboBox.setTextInputAllowed(false);
         priorityComboBox.addValueChangeListener(event -> priorityComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         patientComboBox = new ComboBox<>("Patient");
@@ -313,7 +313,6 @@ class EditWindow extends Window {
         patientComboBox.setWidth("90%");
         patientComboBox.setEmptySelectionAllowed(false);
         patientComboBox.setValue(recipe.getPatient());
-        patientComboBox.setTextInputAllowed(false);
         patientComboBox.addValueChangeListener(event -> patientComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         doctorComboBox = new ComboBox<>("Doctor");
@@ -322,7 +321,6 @@ class EditWindow extends Window {
         doctorComboBox.setWidth("90%");
         doctorComboBox.setEmptySelectionAllowed(false);
         doctorComboBox.setValue(recipe.getDoctor());
-        doctorComboBox.setTextInputAllowed(false);
         doctorComboBox.addValueChangeListener(event -> doctorComboBox.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         endOfShelfLife = new DateField("Validate");

@@ -121,11 +121,11 @@ public class DoctorLayout extends HorizontalLayout {
             Label label = new Label(ValoTheme.LABEL_H1);
             label.setValue("Prescriptions issued");
             Label normal = new Label(ValoTheme.LABEL_H3);
-            normal.setValue("Cito recipes" + " " + normalRecipe);
+            normal.setValue("Normal recipes" + " " + normalRecipe);
             Label cito = new Label(ValoTheme.LABEL_H3);
             cito.setValue("Cito recipes" + " " + citoRecipe);
             Label statim = new Label(ValoTheme.LABEL_H3);
-            statim.setValue("Cito recipes" + " " + statimRecipe);
+            statim.setValue("Statim recipes" + " " + statimRecipe);
             Button close = new Button("Close");
             statW.setModal(true);
             close.addClickListener(c -> {

@@ -28,6 +28,7 @@ public class DoctorView extends VerticalLayout implements View {
         setMargin(true);
         setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         addComponent(menuBar);
+        HorizontalLayout layout = new HorizontalLayout();
         setupLayout();
         addHeader();
         addDoctorList();
@@ -53,7 +54,6 @@ public class DoctorView extends VerticalLayout implements View {
     }
 
     private void addActionButtons() {
-        HorizontalLayout formLayout = new HorizontalLayout();
         Button create = new Button("create");
         create.addClickListener(e -> {
             Button add = new Button("Add");

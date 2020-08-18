@@ -88,7 +88,7 @@ public class RecipeService implements DAO<Recipe> {
         String sql = "SELECT * FROM RECIPE INNER JOIN PATIENT ON RECIPE.PATIENT = PATIENT.ID INNER JOIN DOCTOR ON RECIPE.DOCTOR = DOCTOR.ID WHERE DESCRIPTION LIKE ?";
         List<Recipe> recipes = new LinkedList<>();
         try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setString(1, description);
+            preparedStatement.setString(1, "%"+ description +"%");
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Recipe recipe = new Recipe();
