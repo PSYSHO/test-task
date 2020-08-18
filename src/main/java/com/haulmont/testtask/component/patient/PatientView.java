@@ -15,7 +15,6 @@ import java.sql.SQLException;
 
 @Theme("valo")
 public class PatientView extends VerticalLayout implements View {
-    public static final String NAME = "Patient";
     private VerticalLayout layout;
     private PatientList patientList = new PatientList();
     HorizontalLayout formLayout = new HorizontalLayout();
@@ -35,7 +34,7 @@ public class PatientView extends VerticalLayout implements View {
         addHeader();
         addPatientList();
         addActionButtons();
-
+        patientList.update();
     }
 
 
@@ -52,7 +51,6 @@ public class PatientView extends VerticalLayout implements View {
     }
 
 
-
     private void addPatientList() {
         layout.addComponent(patientList);
     }
@@ -65,25 +63,31 @@ public class PatientView extends VerticalLayout implements View {
             Window newPatient = new Window("New Patient");
             VerticalLayout subContent = new VerticalLayout();
             TextField firstname = new TextField("First Name");
+            firstname.setMaxLength(45);
             TextField secondName = new TextField("Second Name");
+            secondName.setMaxLength(45);
             TextField lastName = new TextField("Last Name");
+            lastName.setMaxLength(45);
             TextField phone = new TextField("Phone");
+            phone.setMaxLength(45);
             add.addClickListener(a -> {
                 Patient patient = new Patient(firstname.getValue(), secondName.getValue(), lastName.getValue(), phone.getValue());
-                try {
-                    patientList.addPatient(patient);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
+                if (validate(firstname, secondName, lastName, phone)) {
+                    try {
+                        patientList.addPatient(patient);
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                    newPatient.close();
                 }
-                newPatient.close();
             });
             HorizontalLayout layout = new HorizontalLayout();
             Button close = new Button("Close");
-            layout.addComponents(add,close);
+            layout.addComponents(add, close);
             subContent.addComponents(firstname, secondName, lastName, phone, layout);
             newPatient.setContent(subContent);
             newPatient.setModal(true);
-            close.addClickListener(c->{
+            close.addClickListener(c -> {
                 newPatient.close();
             });
             add.setClickShortcut(ShortcutAction.KeyCode.ENTER);
@@ -91,6 +95,27 @@ public class PatientView extends VerticalLayout implements View {
         });
 
         layout.addComponent(create);
+    }
+
+    private static boolean validate(TextField firstName, TextField secondName, TextField lastName, TextField phone) {
+        boolean isValid = true;
+        if (firstName.getValue() == null || firstName.getValue().isEmpty()) {
+            firstName.setStyleName("error");
+            isValid = false;
+        }
+        if (secondName.getValue() == null || secondName.getValue().isEmpty()) {
+            secondName.setStyleName("error");
+            isValid = false;
+        }
+        if (lastName.getValue() == null || lastName.getValue().isEmpty()) {
+            lastName.setStyleName("error");
+            isValid = false;
+        }
+        if (phone.getValue() == null || phone.getValue().isEmpty()) {
+            phone.setStyleName("error");
+            isValid = false;
+        }
+        return isValid;
     }
 
     @Override

@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,13 +20,13 @@ public class RecipeService implements DAO<Recipe> {
 
     @Override
     public void add(Recipe recipe) {
-        String sql = "INSERT INTO RECIPE(DESCRIPTION,PATIENT,DOCTOR,CREATEDATA,VALIDATE,PRIORITY)VALUES(?,?,?,?,?,?)";
+        String sql = "INSERT INTO RECIPE(DESCRIPTION,PATIENT,DOCTOR,CREATEDATA,SHELFLIFE,PRIORITY)VALUES(?,?,?,?,?,?)";
         try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, recipe.getDescription());
             preparedStatement.setLong(2, recipe.getPatient().getId());
             preparedStatement.setLong(3, recipe.getDoctor().getId());
             preparedStatement.setObject(4, recipe.getCreateDate());
-            preparedStatement.setObject(5, recipe.getValidate());
+            preparedStatement.setObject(5, recipe.getShelfLife());
             preparedStatement.setString(6, String.valueOf(recipe.getPriority()));
             preparedStatement.executeUpdate();
         } catch (SQLException throwables) {
@@ -58,7 +57,7 @@ public class RecipeService implements DAO<Recipe> {
     @Override
     public Recipe getbyId(long id) throws SQLException {
         Recipe recipe = new Recipe();
-        String sql = "SELECT id,description,patient,doctor,createdata,validate,priority FROM Recipe WHERE ID=?";
+        String sql = "SELECT ID,DESCROPTION,PATIENT,DOCTOR,CREATEDATA,SHELFLIFE,PRIORITY FROM RECIPE WHERE ID=?";
         preparedStatement = connection.prepareStatement(sql);
         ResultSet resultSet = preparedStatement.executeQuery();
         recipe.setId(resultSet.getLong("id"));
@@ -142,13 +141,13 @@ public class RecipeService implements DAO<Recipe> {
 
     @Override
     public void update(Recipe recipe) {
-        String sql = "UPDATE RECIPE SET DESCRIPTION=?,PATIENT=?,DOCTOR=?,CREATEDATA=?,VALIDATE=?,PRIORITY=? where id=?";
+        String sql = "UPDATE RECIPE SET DESCRIPTION=?,PATIENT=?,DOCTOR=?,CREATEDATA=?,SHELFLIFE=?,PRIORITY=? where id=?";
         try (Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setString(1, recipe.getDescription());
             preparedStatement.setLong(2, recipe.getPatient().getId());
             preparedStatement.setLong(3, recipe.getDoctor().getId());
             preparedStatement.setObject(4, recipe.getCreateDate());
-            preparedStatement.setObject(5, recipe.getValidate());
+            preparedStatement.setObject(5, recipe.getShelfLife());
             preparedStatement.setString(6, String.valueOf(recipe.getPriority()));
             preparedStatement.setLong(7, recipe.getId());
             preparedStatement.executeUpdate();
@@ -160,7 +159,7 @@ public class RecipeService implements DAO<Recipe> {
     @Override
     public boolean remove(Recipe recipe) {
         boolean check = false;
-        String sql = "DELETE FROM Recipe where id=?";
+        String sql = "DELETE FROM RECIPE where ID=?";
         try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, recipe.getId());
             preparedStatement.executeUpdate();
@@ -194,12 +193,12 @@ public class RecipeService implements DAO<Recipe> {
     private Recipe fillingInnTheRecipe(Recipe recipe, ResultSet resultSet) throws SQLException {
         Doctor doctor = new Doctor();
         Patient patient = new Patient();
-        recipe.setCreateDate(resultSet.getObject("createdata", LocalDate.class));
-        recipe.setDescription(resultSet.getString("description"));
+        recipe.setCreateDate(resultSet.getObject("CREATEDATA", LocalDate.class));
+        recipe.setDescription(resultSet.getString("DESCRIPTION"));
         recipe.setDoctor(fillingInnTheDoctor(doctor, resultSet));
         recipe.setPatient(fillingInnThePatient(patient, resultSet));
-        recipe.setPriority(Priority.valueOf(resultSet.getString("priority")));
-        recipe.setValidate(resultSet.getObject("validate", LocalDate.class));
+        recipe.setPriority(Priority.valueOf(resultSet.getString("PRIORITY")));
+        recipe.setShelfLife(resultSet.getObject("SHELFLIFE", LocalDate.class));
         return recipe;
     }
 }

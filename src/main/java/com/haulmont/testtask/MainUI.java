@@ -4,6 +4,7 @@ import com.haulmont.testtask.component.doctor.DoctorView;
 import com.haulmont.testtask.component.patient.PatientView;
 import com.haulmont.testtask.component.recipe.RecipeView;
 import com.haulmont.testtask.service.ConnectionManager;
+import com.haulmont.testtask.service.DoctorService;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -19,7 +20,7 @@ public class MainUI extends UI {
 
     public static Navigator navigator;
 
-    private static boolean isDBCreated = false;
+    public DoctorService doctorService = new DoctorService();
 
     public static final String PATIENT = "patient";
 
@@ -31,6 +32,9 @@ public class MainUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
         ConnectionManager.createDB();
+        if(doctorService.getAll().isEmpty()){
+            ConnectionManager.fillingData();
+        }
         navigator = new Navigator(this, this);
         navigator.addView("", new StartView());
         navigator.addView(PATIENT, new PatientView());

@@ -17,10 +17,8 @@ public class DoctorView extends VerticalLayout implements View {
     private VerticalLayout layout;
     private DoctorList doctorList = new DoctorList();
 
-    private DoctorService doctorService;
 
     public DoctorView() {
-        setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         MenuBar menuBar = new MenuBar();
         menuBar.setStyleName("Light");
         menuBar.addItem("Patient", (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("patient"));
@@ -28,12 +26,13 @@ public class DoctorView extends VerticalLayout implements View {
         menuBar.getItems().get(1).setEnabled(false);
         menuBar.addItem("Recipe", (MenuBar.Command) selectedItem -> MainUI.navigator.navigateTo("recipe"));
         setMargin(true);
+        setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         addComponent(menuBar);
         setupLayout();
         addHeader();
         addDoctorList();
         addActionButtons();
-
+        doctorList.update();
     }
 
 
@@ -61,17 +60,23 @@ public class DoctorView extends VerticalLayout implements View {
             Window doctorAddWindow = new Window("New Doctor");
             VerticalLayout subContent = new VerticalLayout();
             TextField firstname = new TextField("First Name");
+            firstname.setMaxLength(45);
             TextField secondName = new TextField("Second Name");
+            secondName.setMaxLength(45);
             TextField lastName = new TextField("Last Name");
+            lastName.setMaxLength(45);
             TextField specializiation = new TextField("Specialization");
+            specializiation.setMaxLength(45);
             add.addClickListener(a -> {
                 Doctor doctor = new Doctor(firstname.getValue(), secondName.getValue(), lastName.getValue(), specializiation.getValue());
-                try {
-                    doctorList.addDoctor(doctor);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
+                if (validate(firstname, secondName, lastName, specializiation)) {
+                    try {
+                        doctorList.addDoctor(doctor);
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                    doctorAddWindow.close();
                 }
-                doctorAddWindow.close();
             });
             HorizontalLayout layout = new HorizontalLayout();
             Button close = new Button("Close");
@@ -90,6 +95,27 @@ public class DoctorView extends VerticalLayout implements View {
         taskField.focus();
         layout.addComponent(create);
 
+    }
+
+    private static boolean validate(TextField firstName, TextField secondName, TextField lastName, TextField specialization) {
+        boolean isValid = true;
+        if (firstName.getValue() == null || firstName.getValue().isEmpty()) {
+            firstName.setStyleName("error");
+            isValid = false;
+        }
+        if (secondName.getValue() == null || secondName.getValue().isEmpty()) {
+            secondName.setStyleName("error");
+            isValid = false;
+        }
+        if (lastName.getValue() == null || lastName.getValue().isEmpty()) {
+            lastName.setStyleName("error");
+            isValid = false;
+        }
+        if (specialization.getValue() == null || specialization.getValue().isEmpty()) {
+            specialization.setStyleName("error");
+            isValid = false;
+        }
+        return isValid;
     }
 
     @Override

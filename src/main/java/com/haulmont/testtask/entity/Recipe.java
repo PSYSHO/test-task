@@ -65,11 +65,11 @@ public class Recipe {
         this.creationDate = createDate;
     }
 
-    public LocalDate getValidate() {
+    public LocalDate getShelfLife() {
         return endOfShelfLife;
     }
 
-    public void setValidate(LocalDate endOfShelfLife) {
+    public void setShelfLife(LocalDate endOfShelfLife) {
         this.endOfShelfLife = endOfShelfLife;
     }
 

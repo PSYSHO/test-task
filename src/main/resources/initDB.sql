@@ -18,7 +18,7 @@ create table IF NOT EXISTS  Recipe(
     PATIENT BIGINT,
     DOCTOR BIGINT,
     CREATEDATA date not null,
-    VALIDATE VARCHAR(45),
+    SHELFLIFE VARCHAR(45),
     PRIORITY VARCHAR(45),
         foreign key (PATIENT) references Patient(id),
         foreign key (DOCTOR) references  Doctor(id)

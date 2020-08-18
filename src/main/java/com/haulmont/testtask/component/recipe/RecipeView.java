@@ -45,14 +45,19 @@ public class RecipeView extends VerticalLayout implements View {
         TextField filter = new TextField();
         ComboBox<String> typeSelect = new ComboBox();
         typeSelect.setItems(PATIENT, PRIORITY, DOCTOR, DESCRIPTION, ALL);
+
         Button search = new Button("Search");
         Button create = new Button("Create");
+
         ComboBox<Patient> patientComboBox = new ComboBox<>();
         ComboBox<Doctor> doctorComboBox = new ComboBox<>();
         ComboBox<Priority> priorityComboBox = new ComboBox<>();
         Grid<Recipe> grid = new Grid();
+
         filterBox.addComponents(typeSelect, filter, search);
         addComponents(filterBox, grid);
+        typeSelect.setTextInputAllowed(false);
+
         typeSelect.addValueChangeListener(event -> {
             if (typeSelect.getValue().equals(DESCRIPTION)) {
                 filterBox.removeAllComponents();
@@ -69,9 +74,12 @@ public class RecipeView extends VerticalLayout implements View {
                 filterBox.removeAllComponents();
                 doctorComboBox.setItems(doctorService.getAll());
                 filterBox.addComponents(typeSelect, doctorComboBox, search, create);
+            } else if (typeSelect.getValue().isEmpty()) {
+                filterBox.removeAllComponents();
+                filterBox.addComponents(typeSelect, search, create);
             } else {
                 filterBox.removeAllComponents();
-                filterBox.addComponents(typeSelect, search,create);
+                filterBox.addComponents(typeSelect, search, create);
             }
         });
         search.addClickListener(e -> {
@@ -95,7 +103,7 @@ public class RecipeView extends VerticalLayout implements View {
         grid.addColumn(Recipe::getPatient).setCaption(PATIENT);
         grid.addColumn(Recipe::getDoctor).setCaption(DOCTOR);
         grid.addColumn(Recipe::getCreateDate).setCaption("Create Date");
-        grid.addColumn(Recipe::getValidate).setCaption("shelf life");
+        grid.addColumn(Recipe::getShelfLife).setCaption("shelf life");
         grid.addColumn(Recipe::getPriority).setCaption(PRIORITY);
         grid.addColumn(recipe -> "edit",
                 new ButtonRenderer(clickEvent -> {
@@ -321,7 +329,7 @@ class EditWindow extends Window {
         endOfShelfLife.setValue(LocalDate.now());
         endOfShelfLife.setWidth("90%");
         endOfShelfLife.setLocale(new Locale("ru", "RU"));
-        endOfShelfLife.setValue(recipe.getValidate());
+        endOfShelfLife.setValue(recipe.getShelfLife());
         endOfShelfLife.addValueChangeListener(event -> endOfShelfLife.setStyleName(ValoTheme.TEXTFIELD_BORDERLESS));
 
         description = new TextField("Descriprion");

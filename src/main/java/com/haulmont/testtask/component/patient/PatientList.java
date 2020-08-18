@@ -20,7 +20,7 @@ public class PatientList extends VerticalLayout implements ChangeListener<Patien
     }
 
     @Override
-    public void changed(Patient patient) throws SQLException {
+    public void changed(Patient patient){
         if (patient.getSelect()){
             patient.setSelect(false);
             update();
@@ -28,7 +28,7 @@ public class PatientList extends VerticalLayout implements ChangeListener<Patien
         else patients.add(patient);
     }
 
-    void update() throws SQLException {
+    void update(){
         setPatient(patientService.getAll());
     }
 

@@ -11,13 +11,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class DoctorService implements DAO<Doctor> {
-    ConnectionManager connectionManager = new ConnectionManager();
-    Connection connection;
-    PreparedStatement preparedStatement = null;
+
 
     @Override
     public void add(Doctor doctor) {
-        connection = connectionManager.getConnection();
         String sql = "Insert INTO DOCTOR(firstname,secondname,lastname,specialization)VALUES(?,?,?,?)";
         try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, doctor.getFirstName());
@@ -33,7 +30,6 @@ public class DoctorService implements DAO<Doctor> {
     @Override
     public List<Doctor> getAll() {
         List<Doctor> doctors = new LinkedList<>();
-        connection = connectionManager.getConnection();
         String sql = "SELECT * FROM DOCTOR";
         try (Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -55,11 +51,9 @@ public class DoctorService implements DAO<Doctor> {
 
     @Override
     public Doctor getbyId(long id) {
-        connection = connectionManager.getConnection();
         Doctor doctor = new Doctor();
         String sql = "SELECT id,firstname,secondname,lastname,specialization FROM Doctor WHERE ID=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             ResultSet resultSet = preparedStatement.executeQuery(sql);
             doctor.setId(resultSet.getLong("id"));
             doctor.setFirstName(resultSet.getString("name"));
@@ -68,25 +62,14 @@ public class DoctorService implements DAO<Doctor> {
             doctor.setSpecialization(resultSet.getString("specialization"));
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
         return doctor;
     }
 
     @Override
     public void update(Doctor doctor) {
-        connection = ConnectionManager.getConnection();
         String sql = "UPDATE DOCTOR SET firstname=?,secondname=?,lastname=?,specialization=?Where id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try(Connection connection = ConnectionManager.getConnection();PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, doctor.getFirstName());
             preparedStatement.setString(2, doctor.getSecondName());
             preparedStatement.setString(3, doctor.getLastName());
@@ -95,15 +78,6 @@ public class DoctorService implements DAO<Doctor> {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null || connection != null) {
-                try {
-                    preparedStatement.close();
-                    connection.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
         }
     }
 

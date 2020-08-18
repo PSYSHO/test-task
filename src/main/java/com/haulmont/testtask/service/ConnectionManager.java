@@ -11,7 +11,8 @@ import java.sql.SQLException;
 public class ConnectionManager {
 
     static Connection connection;
-    public static final String url = "jdbc:hsqldb:mem:task";
+    public static final String url = "jdbc:hsqldb:file:src/main/java/com/haulmont/testtask/DB/db";
+    //"jdbc:hsqldb:mem:task";
     public static final String user = "SA";
     public static final String password = "";
 
@@ -41,6 +42,15 @@ public class ConnectionManager {
             throwables.printStackTrace();
         }
         System.out.println("DB create");
+    }
+    public static void fillingData(){
+        String createData = readToString("src/main/resources/data.sql");
+        try (Connection connection = ConnectionManager.getConnection()) {
+            connection.createStatement().executeUpdate(createData);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        System.out.println("Data in the filling");
     }
 
     public static String readToString(String fname) {
